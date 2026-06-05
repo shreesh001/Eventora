@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const eventRoutes = require('./routes/events');
+const bookingRoutes = require('./routes/booking');
 
 dotenv.config();    
 
@@ -13,6 +15,8 @@ app.use(express.json());
 
 // routes
 app.use('/api/auth', authRoutes);
+app.use('/api/event', eventRoutes);
+app.use('/api/booking', bookingRoutes);
 
 // connect to database
 require('./conn'); 
