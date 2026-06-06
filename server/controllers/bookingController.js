@@ -1,7 +1,7 @@
 const Booking = require('../models/Booking');
 const Event = require('../models/event');
 const OTP = require('../models/OTP');
-const { sendbookingEmail, sentOTPemail } = require('../utils/emailService');
+const { sendbookingEmail, sendOTPEmail } = require('../utils/emailService');
 
 // sending booking otp
 const sendBookingOTP = async (req, res) => {
@@ -14,7 +14,7 @@ const sendBookingOTP = async (req, res) => {
             action: 'event_booking'
         });
 
-        await sentOTPemail(req.user.email, otpData.otp, 'event_booking');
+        await sendOTPEmail(req.user.email, otpData.otp, 'event_booking');
         res.json({ message: 'OTP sent to your email for event booking.' });
     } catch (error) {
         console.error('Error sending booking OTP:', error);

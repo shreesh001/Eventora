@@ -5,7 +5,7 @@ const { bookEvent, sendBookingOTP, getMyBookings, cancelBooking, confirmBooking 
 
 router.post('/',protect, bookEvent);
 router.post('/send-otp', protect, sendBookingOTP);
-router.get('/my-bookings', protect, getMyBookings);
+router.get('/mybookings', protect, getMyBookings);
 router.delete('/:id', protect, cancelBooking);
 router.put('/:id/confirm', protect, admin, confirmBooking);
 

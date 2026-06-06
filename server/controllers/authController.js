@@ -2,7 +2,7 @@ const user = require('../models/user');
 const OTP = require('../models/OTP');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
-const { sendOTPEmail } = require('../utils/emailService');
+const { sendbookingEmail, sendOTPEmail } = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id, email, role) => {

@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 const sendbookingEmail = async (userEmail, userName, eventTitle) => {
     try {
-        const mailOPtions = {
+        const mailOPtions = { 
             from: process.env.EMAIL_USER,
             to: userEmail,
             subject: 'Booking Confirmation',
@@ -30,17 +30,18 @@ const sendbookingEmail = async (userEmail, userName, eventTitle) => {
     }
 };
 
-const sentOTPemail = async (userEmail, otp, type) => {
+const sendOTPEmail = async (userEmail, otp, type) => {
     try {
         const actionText = type === 'account_verification' ? 'Account Verification' : 'Event Booking';
-        const msg = type === 'account_verification' ? "use this OTP to verify your account on Eventora" : "use this OTP to confirm your event booking on Eventora";
+        const msg = type === 'account_verification' ? "Use this OTP to verify your account on Eventora." : "Use this OTP to confirm your event booking on Eventora.";
+        
         const mailOPtions = {
             from: process.env.EMAIL_USER,
             to: userEmail,
             subject: `Your OTP for ${actionText}`,
             html: `
                 <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-                    <h2 style="color: #111;">${title}</h2>
+                    <h2 style="color: #111;">${actionText}</h2>
                     <p style="color: #555; font-size: 16px;">${msg}</p>
                     <div style="margin: 20px auto; padding: 15px; font-size: 24px; font-weight: bold; background: #f4f4f4; width: max-content; letter-spacing: 5px;">
                         ${otp}
@@ -57,4 +58,4 @@ const sentOTPemail = async (userEmail, otp, type) => {
     }
 }
 
-module.exports = { sendbookingEmail, sentOTPemail };
+module.exports = { sendbookingEmail, sendOTPEmail };
