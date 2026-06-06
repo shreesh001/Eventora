@@ -1,0 +1,584 @@
+{
+  "info": {
+    "_postman_id": "d5f4a716-2226-4f08-9091-59b6453e638b",
+    "name": "Eventora APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49529430",
+    "_collection_link": "https://go.postman.co/collection/49529430-d5f4a716-2226-4f08-9091-59b6453e638b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane.Doe@gmail.com\",\n    \"password\": \"Pasword123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Account OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseData = pm.response.json();",
+                  "if(responseData.token) {",
+                  "    pm.environment.set(\"token\", responseData.token);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"jane.Doe@gmail.com\",\n    \"otp\": \"356773\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/auth/verify-otp",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "auth",
+                "verify-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseData = pm.response.json();",
+                  "if(responseData.token) {",
+                  "    pm.environment.set(\"token\", responseData.token);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@eventora.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5001/api/events",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5001/api/events/6a2479318763361985663404",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "events",
+                "6a2479318763361985663404"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseData = pm.response.json();",
+                  "if(responseData._id) {",
+                  "    pm.environment.set(\"event_id\", responseData._id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYSIsImVtYWlsIjoiYWRtaW5AZXZlbnRvcmEuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzgwNzc1NTc0LCJleHAiOjE3ODEwMzQ3NzR9.xp1U6YmcXjZS3I5U3vr4jVPuSuzx1vZTDpi8jlWZjR8",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Tech Conference 2024\",\n    \"description\": \"A massive conference for developers\",\n    \"date\": \"2024-12-01\",\n    \"time\": \"09:00 AM\",\n    \"category\": \"Tech\",\n    \"totalSeats\": 100,\n    \"availableSeats\": 100,\n    \"location\": \"San Francisco, CA\",\n    \"ticketPrice\": 500,\n    \"imageUrl\": \"https://images.unsplash.com/photo-1540575467063-178a50c2df87\",\n    \"createdBy\": \"65ab8f1e9d2c3b4a5f6e7d8c\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/events",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYSIsImVtYWlsIjoiYWRtaW5AZXZlbnRvcmEuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzgwNzc1NTc0LCJleHAiOjE3ODEwMzQ3NzR9.xp1U6YmcXjZS3I5U3vr4jVPuSuzx1vZTDpi8jlWZjR8",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ticketPrice\": 550\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/events/{{event id}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "events",
+                "{{event id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Event (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYSIsImVtYWlsIjoiYWRtaW5AZXZlbnRvcmEuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzgwNzc1NTc0LCJleHAiOjE3ODEwMzQ3NzR9.xp1U6YmcXjZS3I5U3vr4jVPuSuzx1vZTDpi8jlWZjR8",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/events/{{event id}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "events",
+                "{{event id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Send Booking OTP Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYiIsImVtYWlsIjoidXNlckBldmVudG9yYS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4MDc3NjUxOSwiZXhwIjoxNzgxMDM1NzE5fQ.7rezkPZF3izXrcJicD_OaWVLdAAma4BGSAyK1Riyv48",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "html"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/bookings/send-otp",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "bookings",
+                "send-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify & Request Booking (Paid/Free Event)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseData = pm.response.json();",
+                  "if(responseData.booking && responseData.booking._id) {",
+                  "    pm.environment.set(\"booking_id\", responseData.booking._id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYiIsImVtYWlsIjoidXNlckBldmVudG9yYS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4MDc3NjUxOSwiZXhwIjoxNzgxMDM1NzE5fQ.7rezkPZF3izXrcJicD_OaWVLdAAma4BGSAyK1Riyv48",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"eventId\": \"6a2479318763361985663404\",\n    \"otp\": \"319561\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/bookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Booking (Admin - Paid)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYSIsImVtYWlsIjoiYWRtaW5AZXZlbnRvcmEuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzgwNzc2OTA1LCJleHAiOjE3ODEwMzYxMDV9.xanlY6xB1MmU6dPK8AKBf7q7HQz8U32eCKIfb8V1o68",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"paymentStatus\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/bookings/{{booking_id}}/confirm",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "bookings",
+                "{{booking_id}}",
+                "confirm"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYiIsImVtYWlsIjoidXNlckBldmVudG9yYS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4MDc3NzA1MiwiZXhwIjoxNzgxMDM2MjUyfQ.Gy5Oebtiopxy_XFh3lc_YvcwfYukhDCDNoBNOB6MR8E",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/bookings/mybookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "bookings",
+                "mybookings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel/Reject Booking (Admin/User)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjQ3OTMxODc2MzM2MTk4NTY2MzNmYiIsImVtYWlsIjoidXNlckBldmVudG9yYS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4MDc3NzE5NywiZXhwIjoxNzgxMDM2Mzk3fQ.GlsEWUrIlx-o-SMbkngPubzqBrP3vlav0MZSzmcnR8Q",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/bookings/{{booking_id}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5001",
+              "path": [
+                "api",
+                "bookings",
+                "{{booking_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "free_event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "booking_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
