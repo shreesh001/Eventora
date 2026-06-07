@@ -1,5 +1,7 @@
 {
     "files.autoSave": "afterDelay",
     "editor.fontSize": 13,
-    "editor.aiStats.enabled": false
+    "editor.aiStats.enabled": false,
+    "editor.inlineSuggest.suppressSuggestions": false,
+    "editor.acceptSuggestionOnCommitCharacter": true
 }
