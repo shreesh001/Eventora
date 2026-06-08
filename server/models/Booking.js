@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-    user: {                                    
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true
     },
-    event: {                                  
+    event: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
         required: true
     },
-    numberOfSeats: {                           
+    numberOfSeats: {
         type: Number,
         required: true,
         min: 1,
@@ -27,10 +27,18 @@ const bookingSchema = new mongoose.Schema({
         enum: ['paid', 'not_paid'],
         default: 'not_paid'
     },
-    amount:{
+    amount: {
         type: Number,
         required: true,
-        min: 0                                 
+        min: 0
+    },
+    razorpayOrderId: {
+        type: String,
+        default: null
+    },
+    razorpayPaymentId: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 

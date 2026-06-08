@@ -7,8 +7,8 @@ const { sendbookingEmail, sendOTPEmail } = require('../utils/emailService');
 const sendBookingOTP = async (req, res) => {
     try {
         await OTP.deleteMany({ email: req.user.email, action: 'event_booking' });
-        
-        const otpData = await OTP.create({  
+
+        const otpData = await OTP.create({
             email: req.user.email,
             otp: Math.floor(100000 + Math.random() * 900000).toString(),
             action: 'event_booking'
@@ -25,14 +25,14 @@ const sendBookingOTP = async (req, res) => {
 // check otp and book event
 const bookEvent = async (req, res) => {
     try {
-        const { eventId, otp, numberOfSeats = 1 } = req.body; 
+        const { eventId, otp, numberOfSeats = 1 } = req.body;
 
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
         //exact seats check
-        if (event.availableSeats < numberOfSeats) { 
+        if (event.availableSeats < numberOfSeats) {
             return res.status(400).json({ message: 'Not enough seats available' });
         }
 
@@ -41,7 +41,7 @@ const bookEvent = async (req, res) => {
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
 
-        const existingBooking = await Booking.findOne({ user: req.user._id, event: eventId });
+        const existingBooking = await Booking.findOne({ user: req.user._id, event: eventId, status: { $in: ['pending', 'confirmed'] } });
         if (existingBooking) {
             return res.status(400).json({ message: 'You have already booked this event' });
         }
@@ -49,10 +49,10 @@ const bookEvent = async (req, res) => {
         const booking = new Booking({
             user: req.user._id,
             event: event._id,
-            numberOfSeats,                              
+            numberOfSeats,
             status: 'pending',
             paymentStatus: 'not_paid',
-            amount: event.ticketPrice * numberOfSeats  
+            amount: event.ticketPrice * numberOfSeats
         });
         await booking.save();
 
@@ -92,7 +92,7 @@ const confirmBooking = async (req, res) => {
         booking.paymentStatus = paymentStatus;
         await booking.save();
 
-        event.availableSeats -= booking.numberOfSeats; 
+        event.availableSeats -= booking.numberOfSeats;
         await event.save();
 
         await sendbookingEmail(booking.user.email, booking.user.name, booking.event.title);
@@ -135,8 +135,8 @@ const cancelBooking = async (req, res) => {
         booking.status = 'cancelled';
         await booking.save();
 
-        const event = booking.event;              
-        event.availableSeats += booking.numberOfSeats; 
+        const event = booking.event;
+        event.availableSeats += booking.numberOfSeats;
         await event.save();
 
         res.json({ message: 'Booking cancelled successfully' });

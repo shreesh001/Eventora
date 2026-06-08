@@ -33,10 +33,7 @@ const EventDetail = () => {
     }, [id]);
 
     const handleBooking = async () => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
+        if (!user) { navigate('/login'); return; }
         setBookingLoading(true);
         setError('');
 
@@ -44,17 +41,78 @@ const EventDetail = () => {
             if (!showOTP) {
                 await api.post('/bookings/send-otp');
                 setShowOTP(true);
-                setSuccessMsg('OTP sent to your email. Please verify to confirm booking.');
+                setSuccessMsg('OTP sent to your email.');
             } else {
-                await api.post('/bookings', { eventId: event._id, otp, numberOfSeats });
-                setSuccessMsg('Booking requested! Awaiting admin confirmation.');
+                const { data } = await api.post('/bookings', {
+                    eventId: event._id, otp, numberOfSeats
+                });
+
                 setShowOTP(false);
-                setEvent(prev => ({ ...prev, availableSeats: prev.availableSeats - numberOfSeats }));
+
+                // Free event — no payment needed
+                if (event.ticketPrice === 0) {
+                    setSuccessMsg('Booking requested! Awaiting admin confirmation.');
+                    setEvent(prev => ({ ...prev, availableSeats: prev.availableSeats - numberOfSeats }));
+                } else {
+                    // Paid event — Razorpay open karo
+                    await initiatePayment(data.booking._id);
+                }
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Booking failed');
         } finally {
             setBookingLoading(false);
+        }
+    };
+
+    const initiatePayment = async (bookingId) => {
+        try {
+            const { data } = await api.post('/payment/create-order', { bookingId });
+
+            const options = {
+                key: data.key,
+                amount: data.order.amount,
+                currency: 'INR',
+                name: 'Eventora',
+                description: event.title,
+                order_id: data.order.id,
+
+                // Payment successful — verify karo
+                handler: async (response) => {
+                    try {
+                        await api.post('/payment/verify', {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            bookingId
+                        });
+                        setSuccessMsg('Payment successful! Booking confirmed ✓');
+                        setEvent(prev => ({ ...prev, availableSeats: prev.availableSeats - numberOfSeats }));
+                    } catch {
+                        setError('Payment verification failed. Contact support.');
+                    }
+                },
+
+                prefill: {
+                    name: user.name,
+                    email: user.email
+                },
+
+                theme: { color: '#111827' }, // tumhare gray-900 se match
+
+                // User ne payment window band ki
+                modal: {
+                    ondismiss: () => {
+                        setError('Payment cancelled. Your booking request is still pending.');
+                    }
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+
+        } catch (err) {
+            setError('Could not initiate payment. Try again.');
         }
     };
 
@@ -67,7 +125,7 @@ const EventDetail = () => {
     };
 
     if (loading) return <div className="text-center py-20 text-xl font-semibold">Loading...</div>;
-    if (!event) return <div className="text-center py-20 text-xl text-red-500">{error || 'Event not found'}</div>; 
+    if (!event) return <div className="text-center py-20 text-xl text-red-500">{error || 'Event not found'}</div>;
 
     const isSoldOut = event.availableSeats <= 0;
     const isBooked = !!successMsg && !showOTP;
@@ -97,7 +155,7 @@ const EventDetail = () => {
             value: new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
         },
         {
-            icon: <FaRegClock />, 
+            icon: <FaRegClock />,
             label: 'Time',
             value: event.time
         },
@@ -188,11 +246,10 @@ const EventDetail = () => {
                         <button
                             onClick={handleBooking}
                             disabled={isSoldOut || bookingLoading || (showOTP && !otp) || isBooked}
-                            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition shadow-lg ${
-                                isSoldOut || isBooked
+                            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition shadow-lg ${isSoldOut || isBooked
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-gray-900 hover:bg-black text-white hover:shadow-xl hover:-translate-y-1'
-                            }`}
+                                }`}
                         >
                             {getButtonLabel()}
                         </button>
