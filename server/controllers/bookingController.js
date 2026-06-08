@@ -146,10 +146,23 @@ const cancelBooking = async (req, res) => {
     }
 };
 
+// get all bookings for admin
+const getAllBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find()
+            .populate('user', 'name email')
+            .populate('event', 'title date time location totalSeats availableSeats');
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
 module.exports = {
     sendBookingOTP,
     bookEvent,
     confirmBooking,
     getMyBookings,
-    cancelBooking
+    cancelBooking,
+    getAllBookings
 };
