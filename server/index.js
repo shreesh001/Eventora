@@ -9,7 +9,13 @@ dotenv.config();
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        'https://eventora-omega-six.vercel.app/'  
+    ],
+    credentials: true
+}));
 // Middleware to parse JSON bodies
 app.use(express.json());
 
