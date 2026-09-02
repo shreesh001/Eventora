@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/axios';
@@ -29,15 +29,7 @@ const AdminDashboard = () => {
     const [showEventForm, setShowEventForm] = useState(false);
     const [formData, setFormData] = useState(INITIAL_FORM);
 
-    useEffect(() => {
-        if (!user || user.role !== 'admin') {
-            navigate('/login');
-            return;
-        }
-        fetchData();
-    }, [user, navigate]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const eventsRes = await api.get('/events');
             setEvents(eventsRes.data);
@@ -53,7 +45,15 @@ const AdminDashboard = () => {
         }
 
         setLoading(false);
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!user || user.role !== 'admin') {
+            navigate('/login');
+            return;
+        }
+        fetchData();
+    }, [user, navigate, fetchData]);
 
     const handleFormChange = (field, value) => {
         if (field === 'totalSeats') {
@@ -65,6 +65,10 @@ const AdminDashboard = () => {
 
     const handleCreateEvent = async (e) => {
         e.preventDefault();
+        if (Number(formData.availableSeats) > Number(formData.totalSeats)) {
+            alert('Available seats cannot exceed total seats.');
+            return;
+        }
         try {
             await api.post('/events', formData);
             setShowEventForm(false);
@@ -80,8 +84,8 @@ const AdminDashboard = () => {
             try {
                 await api.delete(`/events/${id}`);
                 fetchData();
-            } catch {
-                alert('Error deleting event');
+            } catch (error) {
+                alert(error.response?.data?.message || 'Error deleting event');
             }
         }
     };
@@ -173,9 +177,19 @@ const AdminDashboard = () => {
                             className={inputClass} value={formData.title}
                             onChange={e => handleFormChange('title', e.target.value)} />
 
-                        <input required type="text" placeholder="Category (e.g. Tech, Music)"
-                            className={inputClass} value={formData.category}
-                            onChange={e => handleFormChange('category', e.target.value)} />
+                        <select
+                            required
+                            className={inputClass}
+                            value={formData.category}
+                            onChange={e => handleFormChange('category', e.target.value)}
+                        >
+                            <option value="" disabled>Select a category</option>
+                            <option value="Music">Music</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Tech">Tech</option>
+                            <option value="Food">Food</option>
+                            <option value="Art">Art</option>
+                        </select>
 
                         <input required type="date"
                             className={inputClass} value={formData.date}
@@ -191,17 +205,17 @@ const AdminDashboard = () => {
                             onChange={e => handleFormChange('location', e.target.value)} />
 
                         <input required type="number" placeholder="Ticket Price (0 for free)"
-                            className={inputClass} value={formData.ticketPrice} min={0}
+                            className={inputClass} value={formData.ticketPrice} min={0} step="0.01"
                             onChange={e => handleFormChange('ticketPrice', e.target.value)} />
 
                         {/* totalSeats auto-sets availableSeats */}
                         <input required type="number" placeholder="Total Seats"
-                            className={inputClass} value={formData.totalSeats} min={1}
+                            className={inputClass} value={formData.totalSeats} min={1} step={1}
                             onChange={e => handleFormChange('totalSeats', e.target.value)} />
 
                         {/* availableSeats — was completely missing, auto-filled from totalSeats */}
                         <input required type="number" placeholder="Available Seats"
-                            className={inputClass} value={formData.availableSeats} min={0}
+                            className={inputClass} value={formData.availableSeats} min={0} max={formData.totalSeats || undefined} step={1}
                             onChange={e => handleFormChange('availableSeats', e.target.value)} />
 
                         <div className="md:col-span-2">

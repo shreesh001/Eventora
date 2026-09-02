@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt'); // Note: changed from bcryptjs to match your authController
 const User = require('./models/user'); // Ensure paths match your file structure exactly
-const Event = require('./models/Event');
+const Event = require('./models/event');
 const Booking = require('./models/Booking');
 
 dotenv.config();

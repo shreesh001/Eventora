@@ -17,13 +17,15 @@ const EventDetail = () => {
     const [showOTP, setShowOTP] = useState(false);
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
+    const [pendingPaymentBookingId, setPendingPaymentBookingId] = useState(null);
+    const [bookingComplete, setBookingComplete] = useState(false);
 
     useEffect(() => {
         const fetchEvent = async () => {
             try {
                 const { data } = await api.get(`/events/${id}`);
                 setEvent(data);
-            } catch (err) {
+            } catch {
                 setError('Failed to load event details.');
             } finally {
                 setLoading(false);
@@ -38,23 +40,34 @@ const EventDetail = () => {
         setError('');
 
         try {
+            if (pendingPaymentBookingId) {
+                await initiatePayment(pendingPaymentBookingId);
+                return;
+            }
             if (!showOTP) {
                 await api.post('/bookings/send-otp');
                 setShowOTP(true);
                 setSuccessMsg('OTP sent to your email.');
             } else {
+                const seats = Number(numberOfSeats);
+                if (!Number.isInteger(seats) || seats < 1 || seats > event.availableSeats) {
+                    setError('Choose a valid number of available seats.');
+                    return;
+                }
                 const { data } = await api.post('/bookings', {
-                    eventId: event._id, otp, numberOfSeats
+                    eventId: event._id, otp, numberOfSeats: seats
                 });
 
                 setShowOTP(false);
+                setOtp('');
+                setSuccessMsg('');
 
                 // Free event — no payment needed
                 if (event.ticketPrice === 0) {
                     setSuccessMsg('Booking requested! Awaiting admin confirmation.');
-                    setEvent(prev => ({ ...prev, availableSeats: prev.availableSeats - numberOfSeats }));
+                    setBookingComplete(true);
                 } else {
-                    // Paid event — Razorpay open karo
+                    setPendingPaymentBookingId(data.booking._id);
                     await initiatePayment(data.booking._id);
                 }
             }
@@ -67,6 +80,10 @@ const EventDetail = () => {
 
     const initiatePayment = async (bookingId) => {
         try {
+            if (!window.Razorpay) {
+                setError('Payment service is unavailable. Please try again shortly.');
+                return;
+            }
             const { data } = await api.post('/payment/create-order', { bookingId });
 
             const options = {
@@ -86,8 +103,10 @@ const EventDetail = () => {
                             razorpay_signature: response.razorpay_signature,
                             bookingId
                         });
+                        setPendingPaymentBookingId(null);
+                        setBookingComplete(true);
                         setSuccessMsg('Payment successful! Booking confirmed ✓');
-                        setEvent(prev => ({ ...prev, availableSeats: prev.availableSeats - numberOfSeats }));
+                        setEvent(prev => ({ ...prev, availableSeats: prev.availableSeats - Number(numberOfSeats) }));
                     } catch {
                         setError('Payment verification failed. Contact support.');
                     }
@@ -103,7 +122,7 @@ const EventDetail = () => {
                 // User ne payment window band ki
                 modal: {
                     ondismiss: () => {
-                        setError('Payment cancelled. Your booking request is still pending.');
+                        setError('Payment cancelled. You can retry payment below.');
                     }
                 }
             };
@@ -111,7 +130,7 @@ const EventDetail = () => {
             const rzp = new window.Razorpay(options);
             rzp.open();
 
-        } catch (err) {
+        } catch {
             setError('Could not initiate payment. Try again.');
         }
     };
@@ -119,7 +138,8 @@ const EventDetail = () => {
     const getButtonLabel = () => {
         if (bookingLoading) return 'Processing...';
         if (showOTP) return 'Verify OTP & Confirm';
-        if (isBooked) return 'Request Sent ✓';
+        if (bookingComplete) return 'Request Sent ✓';
+        if (pendingPaymentBookingId) return 'Retry Payment';
         if (isSoldOut) return 'Sold Out';
         return 'Confirm Registration';
     };
@@ -128,7 +148,7 @@ const EventDetail = () => {
     if (!event) return <div className="text-center py-20 text-xl text-red-500">{error || 'Event not found'}</div>;
 
     const isSoldOut = event.availableSeats <= 0;
-    const isBooked = !!successMsg && !showOTP;
+    const isBooked = bookingComplete;
 
     const detailItems = [
         {
@@ -210,7 +230,7 @@ const EventDetail = () => {
                         </div>
 
                         {/* Number of Seats — shown before OTP step */}
-                        {!showOTP && !isBooked && !isSoldOut && (
+                        {!showOTP && !isBooked && !pendingPaymentBookingId && !isSoldOut && (
                             <div className="mb-4">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Number of Seats</label>
                                 <input

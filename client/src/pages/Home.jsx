@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/axios';
 import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaRegClock, FaTicketAlt, FaShieldAlt } from 'react-icons/fa';
@@ -14,12 +14,7 @@ const Home = () => {
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const timeoutId = setTimeout(fetchEvents, 400);
-        return () => clearTimeout(timeoutId);
-    }, [search]);
-
-    const fetchEvents = async () => {
+    const fetchEvents = useCallback(async () => {
         try {
             const { data } = await api.get(`/events?search=${search}`);
             setEvents(data);
@@ -28,7 +23,12 @@ const Home = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [search]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(fetchEvents, 400);
+        return () => clearTimeout(timeoutId);
+    }, [fetchEvents]);
 
     const getSeatPercent = (available, total) =>
         total > 0 ? (available / total) * 100 : 0;

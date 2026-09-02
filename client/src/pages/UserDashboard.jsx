@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/axios';
@@ -16,15 +16,7 @@ const UserDashboard = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchBookings();
-    }, [user, navigate]);
-
-    const fetchBookings = async () => {
+    const fetchBookings = useCallback(async () => {
         try {
             const { data } = await api.get('/bookings/my');
             setBookings(data);
@@ -33,7 +25,19 @@ const UserDashboard = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        if (user.role === 'admin') {
+            navigate('/admin');
+            return;
+        }
+        fetchBookings();
+    }, [user, navigate, fetchBookings]);
 
     const cancelBooking = async (id) => {
         if (window.confirm('Are you sure you want to cancel this booking?')) {
@@ -54,7 +58,7 @@ const UserDashboard = () => {
             {/* Profile Header */}
             <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-8 border border-gray-100 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
                 <div className="w-20 h-20 bg-gray-200 text-gray-900 rounded-full flex items-center justify-center text-3xl font-bold uppercase shrink-0">
-                    {user?.name.charAt(0)}
+                    {user?.name?.charAt(0) || '?'}
                 </div>
                 <div className="flex flex-col items-center sm:items-start">
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">Welcome, {user?.name}!</h1>
